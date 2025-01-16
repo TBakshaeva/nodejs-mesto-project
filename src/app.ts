@@ -1,10 +1,13 @@
 import express, { Response, NextFunction, Request } from 'express';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import { DEFAULT_ERROR_CODE } from './errors/errors';
 import usersRouter from './routes/users';
 import cardsRouter from './routes/cards';
 
-const { PORT = 3000 } = process.env;
+dotenv.config();
+
+const { PORT } = process.env;
 
 const app = express();
 

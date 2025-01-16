@@ -14,10 +14,9 @@ export const getUsersById = (req: Request, res: Response, next: NextFunction) =>
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь не найден' });
-      } else {
-        res.send({ data: user });
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь не найден' });
       }
+      return res.send({ data: user });
     })
     .catch(next);
 };
@@ -30,8 +29,9 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(VALIDATION_ERROR_CODE).send({ message: 'Некорректные данные' });
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -41,15 +41,16 @@ export const updateUser = (req: any, res: Response, next: NextFunction) => {
   User.findByIdAndUpdate(req.user._id, { name, about, avatar }, { new: true })
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь не найден' });
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь не найден' });
       }
-      res.send({ data: user });
+      return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(VALIDATION_ERROR_CODE).send({ message: 'Некорректные данные' });
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -59,14 +60,15 @@ export const updateUserAvatar = (req: any, res: Response, next: NextFunction) =>
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((user) => {
       if (!user) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь не найден' });
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь не найден' });
       }
-      res.send({ data: user });
+      return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(VALIDATION_ERROR_CODE).send({ message: 'Некорректные данные' });
+      } else {
+        next(err);
       }
-      next(err);
     });
 };

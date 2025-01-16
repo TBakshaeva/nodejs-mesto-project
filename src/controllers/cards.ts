@@ -17,8 +17,9 @@ export const createCard = (req: any, res: Response, next: NextFunction) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(VALIDATION_ERROR_CODE).send({ message: 'Некорректные данные' });
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -28,9 +29,9 @@ export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
   Card.findByIdAndDelete(cardId)
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
       }
-      res.send({ data: card });
+      return res.send({ data: card });
     })
     .catch(next);
 };
@@ -45,9 +46,9 @@ export const likeCard = (req: any, res: Response, next: NextFunction) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
       }
-      res.send({ data: card });
+      return res.send({ data: card });
     })
     .catch(next);
 };
@@ -62,9 +63,9 @@ export const dislikeCard = (req: any, res: Response, next: NextFunction) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
       }
-      res.send({ data: card });
+      return res.send({ data: card });
     })
     .catch(next);
 };
