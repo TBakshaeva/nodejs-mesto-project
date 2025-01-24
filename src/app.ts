@@ -1,9 +1,12 @@
 import express, { Response, NextFunction, Request } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { errorLogger, requestLogger } from './middlewares/logger';
+import { createUser, login } from './controllers/users';
 import { DEFAULT_ERROR_CODE } from './errors/errors';
 import usersRouter from './routes/users';
 import cardsRouter from './routes/cards';
+import auth from './middlewares/auth';
 
 dotenv.config();
 
@@ -16,16 +19,17 @@ app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use((req: any, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '6783d92ce192b9dc1ca43b3a',
-  };
+app.use(requestLogger);
 
-  next();
-});
+app.post('/signin', login);
+app.post('/signup', createUser);
+
+app.use(auth);
 
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
+
+app.use(errorLogger);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

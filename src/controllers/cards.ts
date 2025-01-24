@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { NOT_FOUND_ERROR_CODE, VALIDATION_ERROR_CODE } from '../errors/errors';
+import {
+  FORBIDDEN_ERROR_CODE,
+  NOT_FOUND_ERROR_CODE,
+  VALIDATION_ERROR_CODE,
+} from '../errors/errors';
 import Card from '../models/card';
 
 export const getCards = (req: Request, res: Response, next: NextFunction) => {
@@ -16,20 +20,26 @@ export const createCard = (req: any, res: Response, next: NextFunction) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERROR_CODE).send({ message: 'Некорректные данные' });
+        res
+          .status(VALIDATION_ERROR_CODE)
+          .send({ message: 'Некорректные данные' });
       } else {
         next(err);
       }
     });
 };
 
-export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
+export const deleteCard = (req: any, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
+  const userId = req.user._id;
 
   Card.findByIdAndDelete(cardId)
     .then((card) => {
       if (!card) {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
+      }
+      if (card?.owner.toString() !== userId.toString()) {
+        return res.status(FORBIDDEN_ERROR_CODE).send({ message: 'У вас нет прав на удаление этой карточки' });
       }
       return res.send({ data: card });
     })
@@ -46,7 +56,9 @@ export const likeCard = (req: any, res: Response, next: NextFunction) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
+        return res
+          .status(NOT_FOUND_ERROR_CODE)
+          .send({ message: 'Карточка не найдена' });
       }
       return res.send({ data: card });
     })
@@ -63,7 +75,9 @@ export const dislikeCard = (req: any, res: Response, next: NextFunction) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка не найдена' });
+        return res
+          .status(NOT_FOUND_ERROR_CODE)
+          .send({ message: 'Карточка не найдена' });
       }
       return res.send({ data: card });
     })

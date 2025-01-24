@@ -1,3 +1,6 @@
 export const VALIDATION_ERROR_CODE = 400;
 export const NOT_FOUND_ERROR_CODE = 404;
 export const DEFAULT_ERROR_CODE = 500;
+export const UNAUTHORISED_ERROR_CODE = 401;
+export const FORBIDDEN_ERROR_CODE = 403;
+export const CONFLICT_ERROR_CODE = 409;
