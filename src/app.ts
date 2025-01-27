@@ -8,6 +8,7 @@ import { DEFAULT_ERROR_CODE } from './errors/errors';
 import usersRouter from './routes/users';
 import cardsRouter from './routes/cards';
 import auth from './middlewares/auth';
+import NotFoundError from './errors/not-found-error';
 
 dotenv.config();
 
@@ -43,6 +44,10 @@ app.use(auth);
 
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next(new NotFoundError('Страница не найдена'));
+});
 
 app.use(errorLogger);
 

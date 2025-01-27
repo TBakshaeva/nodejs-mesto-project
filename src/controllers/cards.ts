@@ -9,9 +9,6 @@ export const getCards = async (req: Request, res: Response, next: NextFunction) 
     const cards = await Card.find({});
     res.send({ data: cards });
   } catch (err: any) {
-    if (err.name === 'ValidationError') {
-      next(new ValidationError(err.message));
-    }
     next(err);
   }
 };
@@ -21,10 +18,14 @@ export const createCard = async (req: any, res: Response, next: NextFunction) =>
   const ownerId = req.user._id;
 
   try {
-    const newCard = Card.create({ name, link, owner: ownerId });
+    const newCard = await Card.create({ name, link, owner: ownerId });
     res.send({ data: newCard });
-  } catch (err) {
-    next(err);
+  } catch (err: any) {
+    if (err.name === 'ValidationError') {
+      next(new ValidationError(err.message));
+    } else {
+      next(err);
+    }
   }
 };
 
@@ -44,8 +45,9 @@ export const deleteCard = async (req: any, res: Response, next: NextFunction) =>
   } catch (err: any) {
     if (err.name === 'CastError') {
       next(new ValidationError(err.message));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };
 
@@ -62,8 +64,9 @@ export const likeCard = async (req: any, res: Response, next: NextFunction) => {
   } catch (err: any) {
     if (err.name === 'CastError') {
       next(new ValidationError(err.message));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };
 
@@ -80,7 +83,8 @@ export const dislikeCard = async (req: any, res: Response, next: NextFunction) =
   } catch (err: any) {
     if (err.name === 'CastError') {
       next(new ValidationError(err.message));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };

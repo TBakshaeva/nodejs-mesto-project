@@ -46,8 +46,9 @@ export const getUsersById = async (
   } catch (err: any) {
     if (err.name === 'CastError') {
       next(new ValidationError(err.message));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };
 
@@ -89,7 +90,7 @@ export const updateUser = async (
 ) => {
   const { name, about } = req.body;
   try {
-    const updatedUser = User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { name, about },
       { new: true, runValidators: true },
@@ -99,12 +100,13 @@ export const updateUser = async (
   } catch (err: any) {
     if (err.name === 'ValidationError') {
       next(new ValidationError(err.message));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };
 
-export const updateUserAvatar = (
+export const updateUserAvatar = async (
   req: any,
   res: Response,
   next: NextFunction,
@@ -112,7 +114,7 @@ export const updateUserAvatar = (
   const { avatar } = req.body;
 
   try {
-    const updatedAvatar = User.findByIdAndUpdate(
+    const updatedAvatar = await User.findByIdAndUpdate(
       req.user._id,
       { avatar },
       { new: true, runValidators: true },
@@ -122,8 +124,9 @@ export const updateUserAvatar = (
   } catch (err: any) {
     if (err.name === 'ValidationError') {
       next(new ValidationError(err.message));
+    } else {
+      next(err);
     }
-    next(err);
   }
 };
 
