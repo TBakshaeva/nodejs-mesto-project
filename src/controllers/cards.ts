@@ -2,12 +2,16 @@ import { NextFunction, Request, Response } from 'express';
 import Card from '../models/card';
 import NotFoundError from '../errors/not-found-error';
 import ForbiddenError from '../errors/forbidden-error';
+import ValidationError from '../errors/validation-error';
 
 export const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({});
     res.send({ data: cards });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.name === 'ValidationError') {
+      next(new ValidationError(err.message));
+    }
     next(err);
   }
 };
@@ -29,12 +33,18 @@ export const deleteCard = async (req: any, res: Response, next: NextFunction) =>
   const userId = req.user._id;
 
   try {
-    const card = await Card.findByIdAndDelete(cardId).orFail(new NotFoundError('Карточка не найдена'));
-    if (card?.owner.toString() !== userId.toString()) {
+    const card = await Card.findById(cardId).orFail(new NotFoundError('Карточка не найдена'));
+
+    if (card.owner.toString() !== userId.toString()) {
       throw new ForbiddenError('У вас нет прав на удаление этой карточки');
     }
+
+    await Card.findByIdAndDelete(cardId);
     res.send({ data: card });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.name === 'CastError') {
+      next(new ValidationError(err.message));
+    }
     next(err);
   }
 };
@@ -49,7 +59,10 @@ export const likeCard = async (req: any, res: Response, next: NextFunction) => {
       { new: true },
     ).orFail(new NotFoundError('Карточка не найдена'));
     res.send({ data: card });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.name === 'CastError') {
+      next(new ValidationError(err.message));
+    }
     next(err);
   }
 };
@@ -64,7 +77,10 @@ export const dislikeCard = async (req: any, res: Response, next: NextFunction) =
       { new: true },
     ).orFail(new NotFoundError('Карточка не найдена'));
     res.send({ data: card });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.name === 'CastError') {
+      next(new ValidationError(err.message));
+    }
     next(err);
   }
 };

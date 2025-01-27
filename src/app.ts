@@ -11,7 +11,7 @@ import auth from './middlewares/auth';
 
 dotenv.config();
 
-const { PORT } = process.env;
+const { PORT = 3000 } = process.env;
 
 const app = express();
 
@@ -22,7 +22,12 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(requestLogger);
 
-app.post('/signin', login);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  }),
+}), login);
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
@@ -30,7 +35,7 @@ app.post('/signup', celebrate({
     about: Joi.string().min(2).max(200).optional(),
     avatar: Joi.string().pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/).optional(),
     email: Joi.string().email().required(),
-    password: Joi.string().required().min(6),
+    password: Joi.string().required(),
   }),
 }), createUser);
 

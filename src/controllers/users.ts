@@ -5,6 +5,7 @@ import User from '../models/user';
 import NotFoundError from '../errors/not-found-error';
 import ConflictError from '../errors/conflict-error';
 import UnauthorizedError from '../errors/unauthorized-error';
+import ValidationError from '../errors/validation-error';
 
 const SALT_ROUNDS = 10;
 
@@ -23,9 +24,7 @@ export const getUsers = async (
 
 export const getUser = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const user = await User.findById(req.user._id).orFail(
-      new NotFoundError('Пользователь не найден'),
-    );
+    const user = await User.findById(req.user._id);
     res.send({ data: user });
   } catch (err) {
     next(err);
@@ -44,7 +43,10 @@ export const getUsersById = async (
       new NotFoundError('Пользователь не найден'),
     );
     res.send({ data: user });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.name === 'CastError') {
+      next(new ValidationError(err.message));
+    }
     next(err);
   }
 };
@@ -72,6 +74,8 @@ export const createUser = async (
   } catch (err: any) {
     if (err.code === 11000) {
       next(new ConflictError('Пользователь с таким email уже существует'));
+    } else if (err.name === 'ValidationError') {
+      next(new ValidationError(err.message));
     } else {
       next(err);
     }
@@ -83,16 +87,19 @@ export const updateUser = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { name, about, avatar } = req.body;
+  const { name, about } = req.body;
   try {
     const updatedUser = User.findByIdAndUpdate(
       req.user._id,
-      { name, about, avatar },
-      { new: true },
-    ).orFail(new NotFoundError('Пользователь не найден'));
+      { name, about },
+      { new: true, runValidators: true },
+    );
 
     res.send({ data: updatedUser });
   } catch (err: any) {
+    if (err.name === 'ValidationError') {
+      next(new ValidationError(err.message));
+    }
     next(err);
   }
 };
@@ -108,11 +115,14 @@ export const updateUserAvatar = (
     const updatedAvatar = User.findByIdAndUpdate(
       req.user._id,
       { avatar },
-      { new: true },
-    ).orFail(new NotFoundError('Пользователь не найден'));
+      { new: true, runValidators: true },
+    );
 
     res.send({ data: updatedAvatar });
   } catch (err: any) {
+    if (err.name === 'ValidationError') {
+      next(new ValidationError(err.message));
+    }
     next(err);
   }
 };
